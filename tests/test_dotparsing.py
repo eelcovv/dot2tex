@@ -33,7 +33,7 @@ class DotNodeTest(unittest.TestCase):
     def test_cmp(self):
         node = dotp.DotNode("a")
         self.failUnless(node.name == "a")
-        self.assertEqual(node, 'a')
+        self.assertEqual(node.name, 'a')
 
 
 class DotGraphTest(unittest.TestCase):
@@ -95,10 +95,10 @@ class DotSubgraphsTest(unittest.TestCase):
         self.assertEqual(len(g), 0)
         s.add_edge(1, 2)
         self.assertEqual(len(s), 2)
-        self.assertEqual(len(g), 2)
+        self.assertEqual(len(list(g.allnodes)), 2)
         g.add_edge(3, 4)
         self.assertEqual(len(s), 2)
-        self.assertEqual(len(g), 4)
+        self.assertEqual(len(list(g.allnodes)), 4)
 
 
 class DotDefaultAttrTest(unittest.TestCase):
@@ -111,7 +111,7 @@ class DotDefaultAttrTest(unittest.TestCase):
         g.add_default_edge_attr(color="red")
         self.assertEqual(len(g.default_edge_attr), 1)
         g.add_default_graph_attr(color="red")
-        self.assertEqual(len(g.default_graph_attr), 1)
+        self.assertEqual(len(g.attr), 1)
 
     def test_add_default_node(self):
         g = dotp.DotGraph()

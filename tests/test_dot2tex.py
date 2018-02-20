@@ -76,20 +76,20 @@ digraph SSA
 class PGF118CompatibilityTest(unittest.TestCase):
     def test_pgf118option(self):
         source = dot2tex.dot2tex(testgraph, debug=True, pgf118=True)
-        self.failUnless(source.find("\usepackage{pgflibrarysnakes}") >= 0)
-        self.failIf(source.find("\usetikzlibrary") >= 0)
+        self.failUnless(source.find(r"\usepackage{pgflibrarysnakes}") >= 0)
+        self.failIf(source.find(r"\usetikzlibrary") >= 0)
         self.failIf(source.find("line join=bevel") >= 0)
 
     def test_tikz118option(self):
         source = dot2tex.dot2tex(testgraph, debug=True, format='tikz', pgf118=True)
-        self.failUnless(source.find("\usepackage{pgflibrarysnakes}") >= 0)
-        self.failIf(source.find("\usetikzlibrary") >= 0)
+        self.failUnless(source.find(r"\usepackage{pgflibrarysnakes}") >= 0)
+        self.failIf(source.find(r"\usetikzlibrary") >= 0)
         self.failIf(source.find("line join=bevel") >= 0)
 
     def test_nopgf118option(self):
         source = dot2tex.dot2tex(testgraph, debug=True, pgf118=False)
-        self.failIf(source.find("\usepackage{pgflibrarysnakes}") >= 0)
-        self.failUnless(source.find("\usetikzlibrary") >= 0)
+        self.failIf(source.find(r"\usepackage{pgflibrarysnakes}") >= 0)
+        self.failUnless(source.find(r"\usetikzlibrary") >= 0)
         self.failUnless(source.find("line join=bevel") >= 0)
 
 
@@ -163,9 +163,9 @@ class MultipleStatements(unittest.TestCase):
 class TestPositionsOutputFormat(unittest.TestCase):
     # http://code.google.com/p/dot2tex/issues/detail?id=20
     def test_floating_point_coordinates(self):
-        testxdotgraph = """
+        testxdotgraph = r"""
         digraph G {
-            node [label="\N"];
+            node [label=r"\N"];
             graph [bb="0,0,127.21,49.639",
                     _draw_="c 9 -#ffffffff C 9 -#ffffffff P 4 0 -1 0 50 128 50 128 -1 ",
                     xdotversion="1.2"];
@@ -218,7 +218,6 @@ class GraphvizInterfaceTests(unittest.TestCase):
         self.failUnlessEqual(xdot_data, xdot_data2)
         xdot_data2 = create_xdot(testgraph, options='-y')
         self.failIfEqual(xdot_data, xdot_data2, 'No options were passed to dot')
-
 
     def test_invalid_program(self):
         """Invoking create_xdot with an invalid prog parameter should raise an exception"""
@@ -512,7 +511,7 @@ class Issue23Tests(unittest.TestCase):
     # https://github.com/kjellmf/dot2tex/issues/23
 
     def test_multi_line_preamble(self):
-        test_graph = """
+        test_graph = r"""
         digraph
             {
               d2tdocpreamble = "
@@ -527,7 +526,7 @@ class Issue23Tests(unittest.TestCase):
         self.assertTrue(r"% My preamble" in code)
 
     def test_single_line_preamble(self):
-        test_graph = """
+        test_graph = r"""
         digraph
             {
               d2tdocpreamble = "\usepackage{amssymb}  \usetikzlibrary{arrows, automata}";

@@ -52,8 +52,7 @@ import warnings
 
 from . import dotparsing
 
-# Silence DeprecationWarnings about os.popen3 in Python 2.6
-warnings.filterwarnings('ignore', category=DeprecationWarning, message=r'os\.popen3')
+from subprocess import (Popen, PIPE)
 
 # initialize logging module
 log = logging.getLogger("dot2tex")
@@ -210,24 +209,17 @@ def create_xdot(dotdata, prog='dot', options=''):
     progpath = '"%s"' % progs[prog].strip()
     cmd = progpath + ' -T' + output_format + ' ' + options + ' ' + tmp_name
     log.debug('Creating xdot data with: %s', cmd)
-    stdin, stdout, stderr = os.popen3(cmd, 't')
-    stdin.close()
-    try:
-        data = stdout.read()
-    finally:
-        stdout.close()
+    stdout, stderr = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
+    data = stdout.decode("utf-8")
 
-    try:
-        error_data = stderr.read()
-        if error_data:
-            if 'Error:' in error_data:
-                log.error("Graphviz returned with the following message: %s", error_data)
-            else:
-                # Graphviz raises a lot of warnings about too small labels,
-                # we therefore log them using log.debug to "hide" them 
-                log.debug('Graphviz STDERR %s', error_data)
-    finally:
-        stderr.close()
+    error_data = stderr.decode("utf-8")
+    if error_data:
+        if 'Error:' in error_data:
+            log.error("Graphviz returned with the following message: %s", error_data)
+        else:
+            # Graphviz raises a lot of warnings about too small labels,
+            # we therefore log them using log.debug to "hide" them
+            log.debug('Graphviz STDERR %s', error_data)
 
     os.unlink(tmp_name)
     return data
@@ -919,14 +911,14 @@ class DotConvBase(object):
 
         # log.warning('text %s %s',text,str(drawobj))
 
-        if text is None or text.strip() == '\N':
+        if text is None or text.strip() == r'\N':
             if not isinstance(drawobj, dotparsing.DotEdge):
                 text = getattr(drawobj, 'name', None) or \
                        getattr(drawobj, 'graph_name', '')
                 text = text.replace("\\\\", "\\")
             else:
                 text = ''
-        elif text.strip() == '\N':
+        elif text.strip() == r'\N':
             text = ''
         else:
             text = text.replace("\\\\", "\\")
@@ -1879,9 +1871,9 @@ class Dot2PGFConv(DotConvBase):
     def init_template_vars(self):
         DotConvBase.init_template_vars(self)
         if self.options.get('crop'):
-            cropcode = "\usepackage[active,tightpage]{preview}\n" + \
-                       "\PreviewEnvironment{tikzpicture}\n" + \
-                       "\setlength\PreviewBorder{%s}" % self.options.get('margin', '0pt')
+            cropcode = r"\usepackage[active,tightpage]{preview}\n" + \
+                       r"\PreviewEnvironment{tikzpicture}\n" + \
+                       r"\setlength\PreviewBorder{%s}" % self.options.get('margin', '0pt')
         else:
             cropcode = ""
         variables = {'<<cropcode>>': cropcode}
